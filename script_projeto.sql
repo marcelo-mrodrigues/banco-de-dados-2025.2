@@ -4,10 +4,10 @@ use gestao_parques;
 create table Parque(
 	id_parque int primary key auto_increment,
     
-    nome varchar(30),
-    endereco varchar(50),
-    horario_funcionamento varchar(50), -- timestamp seria muito especifico
-    mapa_pdf blob
+    nome varchar(100) not null, -- alteração
+    endereco varchar(255),
+    horario_funcionamento varchar(100), -- timestamp seria muito especifico
+    mapa_pdf LONGBLOB COMMENT 'Requisito: Dado binário (PDF)' -- alteração
 );
 
 create table Evento(
@@ -16,18 +16,19 @@ create table Evento(
     id_parque int not null,
     foreign key (id_parque) references Parque(id_parque),
     
-    nome_evento varchar(30),
+    nome_evento varchar(30) not null, -- alteração
     inicio datetime,
+    fim datetime, -- alteração
     organizador varchar(30)
 );
 
 create table Usuario(
 	id_usuario int primary key auto_increment,
     
-    nome_completo varchar(30),
-    cpf int not null unique,
-    email varchar(30),
-    telefone char(15) -- "(00) 12345-6789" = 15 char
+    nome_completo varchar(150) NOT NULL, -- alteração
+    cpf char(11) not null unique, -- alteração para char
+    email varchar(100) not null unique,
+    telefone varchar(20) -- "(00) 12345-6789" = 15 char (alteração, aumentei)
 );
 
 create table Avaliacao(
@@ -38,9 +39,9 @@ create table Avaliacao(
     id_usuario int not null,
     foreign key (id_usuario) references Usuario(id_usuario),
     
-    nota enum('1','2','3','4','5'),
+    nota enum('1','2','3','4','5'), -- INT NOT NULL CHECK (nota BETWEEN 1 AND 5)
     comentario tinytext,
-    data_avaliacao date
+    data_avaliacao DATE DEFAULT (CURRENT_DATE)
 );
 
 create table Funcionario(
@@ -52,12 +53,13 @@ create table Funcionario(
 
 create table Cargo(
     id_cargo int primary key auto_increment,
-    nome_cargo varchar(15),
+    nome_cargo varchar(30) NOT NULL,
     descricao tinytext
 );
 
 create table Alocacao(
     id_funcionario int not null,
+    primary key (id_funcionario, id_parque), -- um funcionario 1 cargo alteração
     foreign key (id_funcionario) references Funcionario(id_funcionario),
     id_parque int not null,
     foreign key (id_parque) references Parque(id_parque),
@@ -69,13 +71,13 @@ create table Alocacao(
 
 create table Tipo_manutencao(
     id_tipo_manutencao int primary key auto_increment,
-    nome_tipo varchar(30)
+    nome_tipo varchar(30) not null
 );
 
 create table Tipo_equipamento(
     id_tipo_equipamento int primary key auto_increment,
     nome_tipo varchar(30),
-    permite_reserva bool
+    permite_reserva bool default FALSE -- alteração
 );
 
 create table Equipamento(
@@ -102,11 +104,11 @@ create table Ordem_servico(
 
     data_abertura date,
     descricao_problema text,
-    status_ordem enum('Pendente','Concluída','Cancelada')
+    status_ordem enum('Pendente','Concluída','Cancelada') Default 'Pendente' -- alteração
 );
 
 create table Reserva(
-    id_reserva int,
+    id_reserva int primary key auto_increment, -- alteração, pk para facilitar crud e Delete
 
     id_usuario int not null,
     foreign key (id_usuario) references Usuario(id_usuario),
@@ -114,7 +116,7 @@ create table Reserva(
     foreign key (id_equipamento) references Equipamento(id_equipamento),
 
     inicio datetime not null,
-    fim datetime not null,
+    fim datetime not null, -- alteração
 
     constraint id_reserva primary key (id_usuario, id_equipamento, inicio, fim)
 );
