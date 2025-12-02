@@ -105,13 +105,30 @@ class ParqueDB:
     with open(path, "rb") as file:
       # rb = abre o arquivo em modo binario
       return file.read()
+    
+  def reservar_procedure(self, id_usuario, id_equipamento, inicio, fim):
+    try: #nova_rezerva
+        args = (id_usuario, id_equipamento, inicio, fim)
+        
+        self.cursor.callproc('sp_nova_reserva', args)
+        self.db.commit()
+        print("Sucesso na reserva")
+        return True
+        
+    except mysql.connector.Error as err:
+        print(f"Erro ao reservar: {err}")
+        return False
+
 
   def __exit__(self):
     self.cursor.close()
     self.db.close()
 
+
 # # Criando a instancia
 # parquebd = ParqueDB()
+
+
 
 # # Exemplos de create
 # parquebd.create("Parque",{"nome":"Da cidade","endereco":"Brasília","horario_funcionamento":"Todo dia"})
