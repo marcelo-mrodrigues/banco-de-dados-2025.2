@@ -20,17 +20,24 @@ class ParqueDB:
     query = f"insert into {tabela} ({", ".join(colunas)}) values ({", ".join(valores)})"
     self.execute(query)
 
-  def update(self,tabela,colunas,valores,identificador):
-    # Identificador deverá ser uma tupla (ou lista), por exemplo:
-    # ("id_parque","1")
-    # ("nome","'Alice'")
-    formated = []
-    i = 0
-    while i < len(colunas):
-      formated.append(colunas[i] + " = " + valores[i])
-      i += 1
+  def update(self,tabela,novos_valores,identificadores):
+    # -- Novos_valores deverá ser um dicionário
+    # Chave é o nome da coluna
+    # Valor é o valor a ser alterado
+    # Por exemplo: {"horario_funcionamento":"'Quase toda hora'"}
+    # -- Identificador também deverá ser um dicionário
+    # Chave é o nome da coluna
+    # Valor é o valor a ser identificado
+    # Por exemplo: {"nome":"'Parque do apenas um show'"}
+    values = []
+    for key in novos_valores:
+      values.append(key + " = " + novos_valores[key])
+
+    identifiers = []
+    for key in identificadores:
+      identifiers.append(key + " = " + identificadores[key])
     
-    query = f"update {tabela} set {", ".join(formated)} where {identificador[0]} = {identificador[1]}"
+    query = f"update {tabela} set {", ".join(values)} where {" AND ".join(identifiers)}"
     self.execute(query)
 
   def __exit__(self):
@@ -38,5 +45,3 @@ class ParqueDB:
     self.db.close()
 
 parquebd = ParqueDB()
-parquebd.create("Parque",["nome","endereco","horario_funcionamento"],["'Da cidade'","'Brasília'","'Toda hora'"])
-parquebd.update("Parque",["horario_funcionamento"],["'Quase toda hora'"],("id_parque","1"))
