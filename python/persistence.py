@@ -69,6 +69,23 @@ class ParqueDB:
     query = f"update {tabela} set {", ".join(values)} where {" AND ".join(identifiers)}"
     self.execute(query)
 
+  def delete(self,tabela,identificadores):
+    # -- Identificador deverá ser um dicionário
+    # Chave é o nome da coluna
+    # Valor é o valor a ser identificado
+    # Por exemplo: {"id_parque":"1"}
+
+    if not identificadores:
+      # Evitar de deletar a base de dados inteira
+      return
+
+    identifiers = []
+    for key in identificadores:
+      identifiers.append(key + " = " + identificadores[key])
+    
+    query = f"delete from {tabela} where {" AND ".join(identifiers)}"
+    self.execute(query)
+
   def __exit__(self):
     self.cursor.close()
     self.db.close()
@@ -87,3 +104,11 @@ parquebd = ParqueDB()
 # [[print(x) for x in parquebd.read("Parque")]]
 # [[print(x) for x in parquebd.read("Parque",["nome"])]]
 # [[print(x) for x in parquebd.read("Parque",["nome"],{"nome":"'Da cidade'","id_parque":"1"})]]
+
+# Exemplo de delete
+# parquebd.create("Parque",{"nome":"'Apagar'","endereco":"'Temporario'","horario_funcionamento":"'Somente as segs - 12:00 12:01'"})
+# print("-- BD antes de apagar:")
+# [[print(x) for x in parquebd.read("Parque")]]
+# parquebd.delete("Parque",{"nome":"'Apagar'"})
+# print("-- BD depois de apagar:")
+# [[print(x) for x in parquebd.read("Parque")]]
