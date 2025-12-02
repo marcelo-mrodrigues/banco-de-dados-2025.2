@@ -181,7 +181,28 @@ class GestaoParques:
     except Exception as erro:
       print("Erro ao criar elementos:", erro)
 
+  def registrar_reserva_segura_procedure(self , id_usuario, id_equipamento, inicio, fim):
+    try:
+      query = f''' SELECT COUNT(*) FROM Reserva WHERE id_equipamento = {id_equipamento}
+                  and (('{inicio}' < fim AND '{fim}' > inicio)) '''
+      self.cursor.execute(query)
+      conflito = self.cursor.fetchone()[0]
 
+      if conflito > 0:
+        print("Erro de conflito de horário, já existe uma reserva neste periodo")
+        return False
+      dados = {
+            "id_usuario": str(id_usuario),
+            "id_equipamento": str(id_equipamento),
+            "inicio": f"'{inicio}'",
+            "fim": f"'{fim}'"
+        }
+      self.banco.insertTable("Reserva", dados)
+      print("Reserva registrada com sucesso.")
+      return True
+    except Exception as erro:
+      print("Erro ao registrar reserva:", erro)
+      return False
 
   def __del__(self):
     self.banco.quitDB()
