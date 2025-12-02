@@ -7,7 +7,7 @@ BEGIN
     
     SELECT status_conservacao INTO status_atual
     FROM Equipamento
-    WHERE erroid_equipamento = NEW.id_equipamento;
+    WHERE id_equipamento = NEW.id_equipamento;
 
     IF status_atual <> 'Funcional' THEN
         SIGNAL SQLSTATE '45000'
