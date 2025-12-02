@@ -158,5 +158,33 @@ class GestaoParques:
       "fim":"datetime not null",
     },{"Usuario":"id_usuario","Equipamento":"id_equipamento"},uniqueCnstr=["id_usuario", "id_equipamento", "inicio", "fim"])
 
+  def view_e_trigger(self):
+    try:  #  View
+      self.cursor.execute("drop view if exists vw_detalhes_reserva")
+      self.cursor.execute(''' 
+        create view vw_detalhes_reserva as
+        select r.id_reserva, u.nome_completo as usuario, e.nome_equipamento, r.inicio, r.fim, e.status_conservacao
+        from Reserva r
+        join Usuario u on r.id_usuario = u.id_usuario
+        join Equipamento e on r.id_equipamento = e.id_equipamento
+      ''')
+      #  Trigger
+      self.cursor.execute("drop trigger if exists trg_valida_equipamentos")
+      self.cursor.execute('''
+        create trigger trg_valida_equipamentos
+        before insert on Reserva
+        begin select case when (select status_conservacao from Equipamento where 
+        id_equipamento = new.id_equipamento) != 'Funcional' then 
+        raise (abort, 'Equipamento não está funcional.')
+        end; end; ''')
+      self.conexao.commit()
+    except Exception as erro:
+      print("Erro ao criar elementos:", erro)
+
+
+
   def __del__(self):
     self.banco.quitDB()
+
+parque = GestaoParques()
+parque.cria_tabelas_parque()
