@@ -9,6 +9,10 @@ Linguagem de programação: Python
 
 SGBD utilizado: MySQL
 
+## Onde IA foi usada
+- Para revisar e/ou auxiliar na criação de algumas porções de código
+- Para criar uma foto de funcionário
+
 ## Tutoriais
 ### MySQL connector
 Utilizamos o ambiente virtual `projeto_bd`, para mudar para ele no linux basta rodar o seguinte comando na pasta principal:
