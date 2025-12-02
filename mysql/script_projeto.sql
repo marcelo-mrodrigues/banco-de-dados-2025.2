@@ -7,7 +7,7 @@ create table Parque(
     nome varchar(100) not null, -- alteração
     endereco varchar(255),
     horario_funcionamento varchar(100), -- timestamp seria muito especifico
-    mapa_pdf LONGBLOB COMMENT 'Requisito: Dado binário (PDF)' -- alteração
+    mapa_pdf longblob comment 'Requisito: Dado binário (PDF)' -- alteração
 );
 
 create table Evento(
@@ -25,7 +25,7 @@ create table Evento(
 create table Usuario(
 	id_usuario int primary key auto_increment,
     
-    nome_completo varchar(150) NOT NULL, -- alteração
+    nome_completo varchar(150) not null, -- alteração
     cpf char(11) not null unique, -- alteração para char
     email varchar(100) not null unique,
     telefone varchar(20) -- "(00) 12345-6789" = 15 char (alteração, aumentei)
@@ -41,7 +41,7 @@ create table Avaliacao(
     
     nota enum('1','2','3','4','5'), -- INT NOT NULL CHECK (nota BETWEEN 1 AND 5)
     comentario tinytext,
-    data_avaliacao DATE DEFAULT (CURRENT_DATE)
+    data_avaliacao date default (CURRENT_DATE)
 );
 
 create table Funcionario(
@@ -53,7 +53,7 @@ create table Funcionario(
 
 create table Cargo(
     id_cargo int primary key auto_increment,
-    nome_cargo varchar(30) NOT NULL,
+    nome_cargo varchar(30) not null,
     descricao tinytext
 );
 
