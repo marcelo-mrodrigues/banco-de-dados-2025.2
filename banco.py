@@ -56,6 +56,30 @@ class Banco_dados:
     
     self.cursor.execute(f"SELECT {coluna} FROM {tabela}")
     return self.cursor.fetchall()
+  
+  def deleteTable(self, tabela, condicao):
+    comando = f"DELETE FROM {tabela} WHERE {condicao}"
+    try:
+      self.cursor.execute(comando)
+      self.conexao.commit()
+      return('deletado com sucessp')
+    except Exception as erro:
+      print("Erro ao deletar:", erro)
+      return None
+
+#  def updateTable(self, tabela, sets, condicao):
+#    set_clause = ""
+#    for coluna, valor in sets.items():
+#        set_clause += f"{coluna} = {valor}, "
+#    set_clause = set_clause[:-2] # remove ultima virgula
+#    
+#    sql = f"UPDATE {tabela} SET {set_clause} WHERE {condicao}"
+#    try:
+#        self.cursor.execute(sql)
+#        self.conexao.commit()
+#        print(f"atuaização completa.")
+#    except Exception as e:
+#        print(f"erro na atualização")
 
   def quitDB(self):
     self.conexao.close()
