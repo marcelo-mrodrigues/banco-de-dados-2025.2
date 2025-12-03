@@ -143,7 +143,7 @@ class ParqueBD:
     return self.db.insertTable("Parque",data)
   
   def readPark(self,parkID=-1,name=None,address=None,parkshift=None,parkmap=None):
-    if (not parkID) and (not name) and (not address) and (not parkshift) and (not parkmap):
+    if (parkID < 0) and (not name) and (not address) and (not parkshift) and (not parkmap):
       raise ValueError("Identifique o(s) parque(s) de alguma maneira")
 
     filters = {}
