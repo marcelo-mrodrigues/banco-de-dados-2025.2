@@ -1,9 +1,9 @@
 import mysql.connector
 
 class Database:
-  def __init__(self,dbname,dbuser="admin",dbpasswd="admin"):
+  def __init__(self,dbhost,dbname,dbuser,dbpasswd):
     self.db = mysql.connector.connect(
-      host="localhost",
+      host=dbhost,
       user=dbuser,
       passwd=dbpasswd,
       database=dbname
@@ -119,35 +119,116 @@ class Database:
       print(f"Erro ao reservar: {err}")
       return False
 
-  def __exit__(self):
+  def quitConnection(self):
     self.cursor.close()
     self.db.close()
 
 class ParqueBD:
   def __init__(self):
-    self.db = Database("gestao_parques")
+    self.db = Database("localhost","gestao_parques","admin","admin")
 
-  def createUser(self,nome,cpf,email):
-    return self.db.insertTable("Usuario",{"nome_completo":nome,"cpf":cpf,"email":email})
-  
-  def readUser(self,userID=None,name=None,cpf=None,email=None):
-    if (not userID) and ((not name) or (not cpf) or (not email)):
-      return "Identifique o usuario pelo ID ou atributos"
+  def quitDB(self):
+    self.db.quitConnection()
 
-    if name and cpf and email:
-      return self.db.readTable("Usuario",filtros={"nome_completo":name,"cpf":cpf,"email":email})
-    return self.db.readTable("Usuario",filtros={"id_usuario":userID})
-  
-  def updtUser(self,userID=None,name=None,cpf=None,email=None,newname=None,newcpf=None,newemail=None):
-    if (not userID) and ((not name) or (not cpf) or (not email)):
-      return "Identifique o usuario pelo ID ou atributos"
+  # -- CRUD Parque --
+  def createPark(self,name,address=None,parkshift=None,parkmap=None):
+    data = {"nome":name}
+    if address:
+      data["endereco"] = address
+    if parkshift:
+      data["horario_funcionamento"] = parkshift
+    if parkmap:
+      data["mapa_pdf"] = parkmap
     
-    # Prioriza identificar por nome cpf e email para
-    # permitir uma insercao mais simples passando ID aleatorio
-    if name and cpf and email:
-      identificadores = {"nome_completo":name,"cpf":cpf,"email":email}
-    else:
-      identificadores = {"id_usuario":userID}
+    return self.db.insertTable("Parque",data)
+  
+  def readPark(self,parkID=-1,name=None,address=None,parkshift=None,parkmap=None):
+    if (not parkID) and (not name) and (not address) and (not parkshift) and (not parkmap):
+      raise ValueError("Identifique o(s) parque(s) de alguma maneira")
+
+    filters = {}
+    if parkID > 0:
+      filters["id_parque"] = parkID
+    if name:
+      filters["nome"] = name
+    if address:
+      filters["endereco"] = address
+    if parkshift:
+      filters["horario_funcionamento"] = parkshift
+    if parkmap:
+      filters["mapa_pdf"] = parkmap
+
+    return self.db.readTable("Parque",filtros=filters)
+  
+  def updtPark(self,parkID,newname=None,newaddress=None,newparkshift=None,newparkmap=None): 
+    if parkID < 0:
+      raise ValueError("ID de parque invalido na atualizacao")
+
+    invalid = 0 # se os tres campos forem vazios nao ha o que atualizar
+    novos_valores = {}
+    if newname:
+      novos_valores["nome"] = newname
+      invalid += 1
+    if newaddress:
+      novos_valores["endereco"] = newaddress
+      invalid += 1
+    if newparkshift:
+      novos_valores["horario_funcionamento"] = newparkshift
+      invalid += 1
+    if newparkmap:
+      novos_valores["mapa_pdf"] = newparkmap
+      invalid += 1
+    
+    if invalid < 1:
+      raise ValueError("Para atualizar o parque altere pelo menos uma coluna")
+    
+    return self.db.updateTable("Parque",novos_valores,{"id_parque":parkID})
+  
+  def deletePark(self,parkID):
+    if parkID < 0:
+      raise ValueError("ID de parque invalido na remoção")
+    return self.db.deleteTable("Parque",{"id_parque":parkID})
+  
+  # -- CRUD Usuario --
+  def createUser(self,name,cpf,email,telephone=None):
+    if (not name) or (not cpf) or (not email):
+      raise ValueError("Faltam dados para criar o usuario")
+    
+    data = {"nome_completo":name,"cpf":cpf,"email":email}
+    if telephone:
+      data["telefone"] = telephone
+    
+    return self.db.insertTable("Usuario",data)
+  
+  def readUser(self,userID=-1,name=None,cpf=None,email=None,telephone=None):
+    if (userID < 0) and (not name) and (not cpf) and (not email) and (not telephone):
+      raise ValueError("Identifique o(s) usuario(s) de alguma maneira")
+
+    filters = {}
+    if userID > 0:
+      filters["id_usuario"] = userID
+    if name:
+      filters["nome_completo"] = name
+    if cpf:
+      filters["cpf"] = cpf
+    if email:
+      filters["email"] = email
+    if telephone:
+      filters["telefone"] = telephone
+
+    return self.db.readTable("Usuario",filtros=filters)
+  
+  def updtUser(self,userID=-1,cpf=None,email=None,newname=None,newcpf=None,newemail=None,newtelephone=None):
+    if (userID < 0) and (not cpf) and (not email):
+      raise ValueError("Identifique o usuario pelo ID, cpf ou email")
+    
+    identificadores = {}
+    if userID > 0:
+      identificadores["id_usuario"] = userID
+    if cpf:
+      identificadores["cpf"] = cpf
+    if email:
+      identificadores["email"] = email
 
     invalid = 0 # se os tres campos forem vazios nao ha o que atualizar
     novos_valores = {}
@@ -160,27 +241,27 @@ class ParqueBD:
     if newemail:
       novos_valores["email"] = newemail
       invalid += 1
+    if newtelephone:
+      novos_valores["telefone"] = newtelephone
+      invalid += 1
+    
     if invalid < 1:
-      return "Altere pelo menos um valor"
+      raise ValueError("Altere pelo menos uma coluna do usuario")
     
     return self.db.updateTable("Usuario",novos_valores,identificadores)
   
-  def deleteUser(self,userID=None,name=None,cpf=None,email=None):
-    if (not userID) and ((not name) or (not cpf) or (not email)):
-      return "Identifique o usuario pelo ID ou atributos"
+  def deleteUser(self,userID=-1,cpf=None,email=None):
+    if (userID < 0) and (not cpf) and (not email):
+      raise ValueError("Identifique o usuario pelo ID, cpf ou email")
 
-    if name and cpf and email:
-      return self.db.deleteTable("Usuario",{"nome_completo":name,"cpf":cpf,"email":email})
-    return self.db.deleteTable("Usuario",{"id_usuario":userID})
+    filters = {}
+    if userID > 0:
+      filters["id_usuario"] = userID
+    if cpf:
+      filters["cpf"] = cpf
+    if email:
+      filters["email"] = email
+
+    return self.db.deleteTable("Usuario",filters)
 
 mybd = ParqueBD()
-# print(mybd.createUser("Claudio","00000000001","claudio@fake.com"))
-# print(mybd.readUser("1"))
-# print(mybd.readUser("-1","Claudio","00000000001","claudio2@fake.com"))
-# print(mybd.updtUser(userID="1",newemail="claudio3@fake.com"))
-# print(mybd.updtUser("-1","Claudio","00000000001","claudio3@fake.com",newemail="claudio2@fake.com"))
-# print(mybd.deleteUser("1"))
-# print(mybd.createUser("Irmao do Claudio","00000000002","claudiobrother@fake.com"))
-# print(mybd.readUser("1"))
-# print(mybd.readUser("2"))
-# print(mybd.deleteUser("-1","Irmao do Claudio","00000000002","claudiobrother@fake.com"))
