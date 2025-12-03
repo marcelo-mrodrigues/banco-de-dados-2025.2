@@ -10,8 +10,8 @@ Linguagem de programação: Python
 SGBD utilizado: MySQL
 
 ## Onde IA foi usada
-- Para revisar e/ou auxiliar na criação de algumas porções de código
 - Para criar uma foto de funcionário
+- Para criar uma base para os cruds de funcionario baseado nos cruds de usuário e parque. Foram feitas alterações e revisões humanas
 
 ## Tutoriais
 ### MySQL connector

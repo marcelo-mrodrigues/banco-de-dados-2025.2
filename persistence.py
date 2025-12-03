@@ -131,19 +131,19 @@ class ParqueBD:
     self.db.quitConnection()
 
   # -- CRUD Parque --
-  def createPark(self,name,address=None,parkshift=None,parkmap=None):
+  def createPark(self,name,address=None,parkshift=None,mappath=None):
     data = {"nome":name}
     if address:
       data["endereco"] = address
     if parkshift:
       data["horario_funcionamento"] = parkshift
-    if parkmap:
-      data["mapa_pdf"] = parkmap
+    if mappath:
+      data["mapa_pdf"] = self.db.openBlob(mappath)
     
     return self.db.insertTable("Parque",data)
   
-  def readPark(self,parkID=-1,name=None,address=None,parkshift=None,parkmap=None):
-    if (parkID < 0) and (not name) and (not address) and (not parkshift) and (not parkmap):
+  def readPark(self,parkID=-1,name=None,address=None,parkshift=None):
+    if (parkID < 1) and (not name) and (not address) and (not parkshift):
       raise ValueError("Identifique o(s) parque(s) de alguma maneira")
 
     filters = {}
@@ -155,13 +155,11 @@ class ParqueBD:
       filters["endereco"] = address
     if parkshift:
       filters["horario_funcionamento"] = parkshift
-    if parkmap:
-      filters["mapa_pdf"] = parkmap
 
     return self.db.readTable("Parque",filtros=filters)
   
-  def updtPark(self,parkID,newname=None,newaddress=None,newparkshift=None,newparkmap=None): 
-    if parkID < 0:
+  def updtPark(self,parkID,newname=None,newaddress=None,newparkshift=None,newmappath=None): 
+    if parkID < 1:
       raise ValueError("ID de parque invalido na atualizacao")
 
     invalid = 0 # se os tres campos forem vazios nao ha o que atualizar
@@ -175,17 +173,17 @@ class ParqueBD:
     if newparkshift:
       novos_valores["horario_funcionamento"] = newparkshift
       invalid += 1
-    if newparkmap:
-      novos_valores["mapa_pdf"] = newparkmap
+    if newmappath:
+      novos_valores["mapa_pdf"] = self.db.openBlob(newmappath)
       invalid += 1
     
     if invalid < 1:
-      raise ValueError("Para atualizar o parque altere pelo menos uma coluna")
+      raise ValueError("Forneça ao menos um dado novo para atualizar o parque")
     
     return self.db.updateTable("Parque",novos_valores,{"id_parque":parkID})
   
   def deletePark(self,parkID):
-    if parkID < 0:
+    if parkID < 1:
       raise ValueError("ID de parque invalido na remoção")
     return self.db.deleteTable("Parque",{"id_parque":parkID})
   
@@ -201,7 +199,7 @@ class ParqueBD:
     return self.db.insertTable("Usuario",data)
   
   def readUser(self,userID=-1,name=None,cpf=None,email=None,telephone=None):
-    if (userID < 0) and (not name) and (not cpf) and (not email) and (not telephone):
+    if (userID < 1) and (not name) and (not cpf) and (not email) and (not telephone):
       raise ValueError("Identifique o(s) usuario(s) de alguma maneira")
 
     filters = {}
@@ -219,7 +217,7 @@ class ParqueBD:
     return self.db.readTable("Usuario",filtros=filters)
   
   def updtUser(self,userID=-1,cpf=None,email=None,newname=None,newcpf=None,newemail=None,newtelephone=None):
-    if (userID < 0) and (not cpf) and (not email):
+    if (userID < 1) and (not cpf) and (not email):
       raise ValueError("Identifique o usuario pelo ID, cpf ou email")
     
     identificadores = {}
@@ -246,12 +244,12 @@ class ParqueBD:
       invalid += 1
     
     if invalid < 1:
-      raise ValueError("Altere pelo menos uma coluna do usuario")
+      raise ValueError("Forneça ao menos um dado novo para atualizar o usuario")
     
     return self.db.updateTable("Usuario",novos_valores,identificadores)
   
   def deleteUser(self,userID=-1,cpf=None,email=None):
-    if (userID < 0) and (not cpf) and (not email):
+    if (userID < 1) and (not cpf) and (not email):
       raise ValueError("Identifique o usuario pelo ID, cpf ou email")
 
     filters = {}
@@ -263,5 +261,68 @@ class ParqueBD:
       filters["email"] = email
 
     return self.db.deleteTable("Usuario",filters)
+  
+  # -- CRUD Funcionario --
+  # Gerado inicalmente por IA
+  # Devidamente revisado por humano
+  def createEmployee(self, name, registration, photopath=None):
+    data = {"nome_completo": name, "matricula": registration}
+    if photopath:
+      data["foto_perfil"] = self.db.openBlob(photopath)
+    
+    return self.db.insertTable("Funcionario", data)
+
+  def readEmployee(self, funcID=-1, name=None, registration=None):
+    if (funcID < 1) and (not name) and (not registration):
+      raise ValueError("Identifique o(s) funcionário(s) por ID, Nome ou Matrícula")
+
+    filters = {}
+    if funcID > 0:
+      filters["id_funcionario"] = funcID
+    if name:
+      filters["nome_completo"] = name
+    if registration:
+      filters["matricula"] = registration
+
+    return self.db.readTable("Funcionario", filtros=filters)
+
+  def updtEmployee(self, funcID=-1, registration=None, newname=None, newregistration=None, newphotopath=None):
+    if (funcID < 1) and (not registration):
+      raise ValueError("Identifique o funcionário pelo ID ou Matrícula para atualizar")
+    
+    identificadores = {}
+    if funcID > 0:
+      identificadores["id_funcionario"] = funcID
+    if registration:
+      identificadores["matricula"] = registration
+
+    invalid = 0
+    novos_valores = {}
+    if newname:
+      novos_valores["nome_completo"] = newname
+      invalid += 1
+    if newregistration:
+      novos_valores["matricula"] = newregistration
+      invalid += 1
+    if newphotopath:
+      novos_valores["foto_perfil"] = self.db.openBlob(newphotopath)
+      invalid += 1
+    
+    if invalid < 1:
+      raise ValueError("Forneça ao menos um dado novo para atualizar o funcionario")
+    
+    return self.db.updateTable("Funcionario", novos_valores, identificadores)
+
+  def deleteEmployee(self, funcID=-1, registration=None):
+    if (funcID < 1) and (not registration):
+      raise ValueError("Identifique o funcionário pelo ID ou Matrícula para remover")
+
+    filters = {}
+    if funcID > 0:
+      filters["id_funcionario"] = funcID
+    if registration:
+      filters["matricula"] = registration
+
+    return self.db.deleteTable("Funcionario", filters)
 
 mybd = ParqueBD()

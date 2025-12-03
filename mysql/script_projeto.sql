@@ -46,8 +46,8 @@ create table Avaliacao(
 
 create table Funcionario(
     id_funcionario int primary key auto_increment,
-    nome_completo varchar(30),
-    matricula int unique,
+    nome_completo varchar(30) not null,
+    matricula int unique not null,
     foto_perfil mediumblob
 );
 
