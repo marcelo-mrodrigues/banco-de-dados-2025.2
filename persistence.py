@@ -189,9 +189,6 @@ class ParqueBD:
   
   # -- CRUD Usuario --
   def createUser(self,name,cpf,email,telephone=None):
-    if (not name) or (not cpf) or (not email):
-      raise ValueError("Faltam dados para criar o usuario")
-    
     data = {"nome_completo":name,"cpf":cpf,"email":email}
     if telephone:
       data["telefone"] = telephone
