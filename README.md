@@ -11,7 +11,7 @@ SGBD utilizado: MySQL
 
 ## Onde IA foi usada
 - Para criar uma foto de funcionário
-- Para criar uma base para os cruds de funcionario baseado nos cruds de usuário e parque. Foram feitas alterações e revisões humanas
+- Para criar uma base para os cruds de funcionario, cargo,tipo_manutencao e tipo_equipamento baseado nos cruds de usuário e parque que foram feitos sem o auxílio de ferramentas de IA.
 
 ## Tutoriais
 ### MySQL connector
