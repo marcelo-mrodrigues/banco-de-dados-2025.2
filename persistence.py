@@ -1,5 +1,4 @@
 import mysql.connector
-import datetime
 
 class Database:
   def __init__(self,dbhost,dbname,dbuser,dbpasswd):
