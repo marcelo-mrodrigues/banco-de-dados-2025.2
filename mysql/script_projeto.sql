@@ -38,10 +38,10 @@ create table Avaliacao(
     foreign key (id_parque) references Parque(id_parque),
     id_usuario int not null,
     foreign key (id_usuario) references Usuario(id_usuario),
-    
-    nota enum('1','2','3','4','5'), -- INT NOT NULL CHECK (nota BETWEEN 1 AND 5)
+
+    nota int not null check (nota between 1 and 5), -- alteracao
     comentario tinytext,
-    data_avaliacao date default (CURRENT_DATE)
+    data_avaliacao date default (CURRENT_DATE) not null -- alteracao
 );
 
 create table Funcionario(

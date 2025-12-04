@@ -1,4 +1,5 @@
 import mysql.connector
+import datetime
 
 class Database:
   def __init__(self,dbhost,dbname,dbuser,dbpasswd):
@@ -433,5 +434,133 @@ class ParqueBD:
     if typeID < 1:
       raise ValueError("ID inválido na remoção do tipo de equipamento")
     return self.db.deleteTable("Tipo_equipamento", {"id_tipo_equipamento": typeID})
+  
+  # -- CRUD Evento --
+  def createEvent(self, parkID, name, start=None, end=None, organizer=None):
+    # start e end devem ser passadas no formato 'YYYY-MM-DD HH:MM:SS' ou objeto datetime
+    # não confundir "data" de dados em ingles, com data de tempo
+    if parkID < 1:
+      raise ValueError("É necessário vincular o evento a um parque válido (ID > 0)")
+
+    data = {"id_parque": parkID, "nome_evento": name}
+    if start:
+      data["inicio"] = start
+    if end:
+      data["fim"] = end
+    if organizer:
+      data["organizador"] = organizer
+    
+    return self.db.insertTable("Evento", data)
+
+  def readEvent(self, eventID=-1, parkID=-1, name=None, start=None, end=None, organizer=None):
+    # A busca por eventos é bem mais fléxivel do que as demais
+
+    filters = {}
+    if eventID > 0:
+      filters["id_evento"] = eventID
+    if parkID > 0:
+      filters["id_parque"] = parkID
+    if name:
+      filters["nome_evento"] = name
+    if start:
+      filters["inicio"] = start
+    if end:
+      filters["fim"] = end
+    if organizer:
+      filters["organizador"] = organizer
+
+    if len(filters) < 1:
+      raise ValueError("É necessário pelo menos alguma informação para buscar por evento(s)")
+    
+    return self.db.readTable("Evento", filtros=filters)
+
+  def updtEvent(self, eventID, newparkID=-1, newname=None, newstart=None, newend=None, neworganizer=None):
+    if eventID < 1:
+      raise ValueError("ID de evento inválido na atualização")
+    
+    invalid = 0
+    novos_valores = {}
+    
+    if newparkID > 0:
+      novos_valores["id_parque"] = newparkID
+      invalid += 1
+    if newname:
+      novos_valores["nome_evento"] = newname
+      invalid += 1
+    if newstart:
+      novos_valores["inicio"] = newstart
+      invalid += 1
+    if newend:
+      novos_valores["fim"] = newend
+      invalid += 1
+    if neworganizer:
+      novos_valores["organizador"] = neworganizer
+      invalid += 1
+
+    if invalid < 1:
+      raise ValueError("Forneça ao menos um dado novo para atualizar o evento")
+
+    return self.db.updateTable("Evento", novos_valores, {"id_evento": eventID})
+
+  def deleteEvent(self, eventID):
+    if eventID < 1:
+      raise ValueError("ID de evento inválido na remoção")
+    return self.db.deleteTable("Evento", {"id_evento": eventID})
+  
+  # -- CRUD Avaliacao --
+  def createReview(self, parkID, userID, rating, comment=None, date=None):
+    if (parkID < 1) or (userID < 1):
+      raise ValueError("É necessário vincular a avaliação a um parque e usuário válidos")
+
+    data = {"id_parque": parkID, "id_usuario": userID, "nota": rating}
+    
+    if comment:
+      data["comentario"] = comment
+    if date:
+      data["data_avaliacao"] = date
+    
+    return self.db.insertTable("Avaliacao", data)
+
+  def readReview(self, avaliacaoID=-1, parkID=-1, userID=-1,rating=None,date=None):
+    filters = {}
+    if avaliacaoID > 0:
+      filters["id_avaliacao"] = avaliacaoID
+    if parkID > 0:
+      filters["id_parque"] = parkID
+    if userID > 0:
+      filters["id_usuario"] = userID
+    if rating:
+      filters["nota"] = rating
+    if date:
+      filters["data"] = date
+    
+    if len(filters) < 1:
+      raise ValueError("Identifique a(s) avaliação(ões) pelo ID, parque, usuário, nota ou data")
+
+    return self.db.readTable("Avaliacao", filtros=filters)
+
+  def updtReview(self, avaliacaoID, newrating=None, newcomment=None):
+    if avaliacaoID < 1:
+      raise ValueError("ID de avaliação inválido na atualização")
+    
+    invalid = 0
+    novos_valores = {}
+    
+    if newrating:
+      novos_valores["nota"] = newrating
+      invalid += 1
+    if newcomment:
+      novos_valores["comentario"] = newcomment
+      invalid += 1
+    
+    if invalid < 1:
+      raise ValueError("Forneça ao menos um dado novo para atualizar a avaliação")
+
+    return self.db.updateTable("Avaliacao", novos_valores, {"id_avaliacao": avaliacaoID})
+
+  def deleteReview(self, avaliacaoID):
+    if avaliacaoID < 1:
+      raise ValueError("ID de avaliação inválido na remoção")
+    return self.db.deleteTable("Avaliacao", {"id_avaliacao": avaliacaoID})
 
 mybd = ParqueBD()
