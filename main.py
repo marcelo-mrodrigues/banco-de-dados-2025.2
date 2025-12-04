@@ -308,8 +308,9 @@ def menu_funcionario(bd):
 
             nome = ler_input_opcional("Novo Nome: ")
             mat = ler_input_opcional("Nova Matricula: ")
+            foto = ler_input_opcional("Caminho da Nova Foto: ")
             try:
-                bd.updtEmployee(funcID=id_f, newname=nome, newregistration=mat)
+                bd.updtEmployee(funcID=id_f, newname=nome, newregistration=mat,newphotopath=foto)
                 print("Sucesso: Atualizado!")
             except Exception as e:
                 print(f"Erro: {e}")
@@ -465,6 +466,51 @@ def menu_auxiliar(bd):
             break
 
 
+def menu_view_agenda_reservas(bd):
+    while True:
+        print("CONSULTA DA VIEW: Agenda de Reservas")
+        print("1. Listar todas as reservas")
+        print("0. Voltar")
+        opcao = input("\nEscolha: ")
+        if opcao == '1':
+            try:
+                bd.db.cursor.execute("SELECT * FROM vw_agenda_reservas")
+                resultados = bd.db.cursor.fetchall()
+                imprimir_resultados(resultados, ["ID Reserva", "Usuario", "Equipamento", "Parque", "Inicio", "Fim", "Status"])
+            except Exception as e:
+                print(f"Erro: {e}")
+            pausar()
+        elif opcao == '0':
+            break
+        else:
+            print("Opcao invalida.")
+            pausar()
+
+
+def menu_procedure_reserva(bd):
+    while True:
+        print("EXECUTAR PROCEDURE: Nova Reserva")
+        print("1. Criar nova reserva (sp_nova_reserva)")
+        print("0. Voltar")
+        opcao = input("\nEscolha: ")
+        if opcao == '1':
+            try:
+                id_usuario = ler_int("ID do Usuario: ")
+                id_equipamento = ler_int("ID do Equipamento: ")
+                inicio = input("Inicio (YYYY-MM-DD HH:MM:SS): ")
+                fim = input("Fim (YYYY-MM-DD HH:MM:SS): ")
+                bd.reservar_procedure(id_usuario, id_equipamento, inicio, fim)
+                print("Reserva criada via procedure!")
+            except Exception as e:
+                print(f"Erro: {e}")
+            pausar()
+        elif opcao == '0':
+            break
+        else:
+            print("Opcao invalida.")
+            pausar()
+
+
 def main():
 
     bd = ParqueBD()
@@ -475,6 +521,8 @@ def main():
         print("2. Gerenciar Usuarios")
         print("3. Gerenciar Funcionarios")
         print("4. Mais opções")
+        print("5. Consultar Agenda de Reservas (VIEW)")
+        print("6. Executar Procedure de Reserva")
         print("0. Sair")
 
         opcao = input("\nDigite sua opcao: ")
@@ -487,6 +535,10 @@ def main():
             menu_funcionario(bd)
         elif opcao == '4':
             menu_auxiliar(bd)
+        elif opcao == '5':
+            menu_view_agenda_reservas(bd)
+        elif opcao == '6':
+            menu_procedure_reserva(bd)
         elif opcao == '0':
             print("\nEncerrando programa...")
             bd.quitDB()
