@@ -38,7 +38,7 @@ class Database:
       values.append(dados[key])
       placeholders.append("%s")
     
-    query = f"insert into {tabela} ({", ".join(columns)}) values ({", ".join(placeholders)})"
+    query = f"insert into {tabela} ({', '.join(columns)}) values ({', '.join(placeholders)})"
     return self.executeQuery(query,values)
 
   def readTable(self, tabela, colunas=["*"], filtros=None):
@@ -46,7 +46,7 @@ class Database:
     # Por exemplo: ["nome","endereco"]
     # -- Filtros é um dicionário com os filtros desejados
     # Por exemplo: {"id_parque":"1","nome":"Parque do apenas um show"}
-    query = f"select {", ".join(colunas)} from {tabela}"
+    query = f"select {', '.join(colunas)} from {tabela}"
 
     filters = []
     if filtros:
@@ -85,7 +85,7 @@ class Database:
       identifiers.append(identificadores[key])
       identifier_placeholder.append(key + " = %s")
     
-    query = f"update {tabela} set {", ".join(value_placeholder)} where {" AND ".join(identifier_placeholder)}"
+    query = f"update {tabela} set {', '.join(value_placeholder)} where {' AND '.join(identifier_placeholder)}"
     return self.executeQuery(query,values+identifiers)
 
   def deleteTable(self,tabela,identificadores):
@@ -104,7 +104,7 @@ class Database:
       identifiers.append(identificadores[key])
       placeholders.append(key + " = %s")
     
-    query = f"delete from {tabela} where {" AND ".join(placeholders)}"
+    query = f"delete from {tabela} where {' AND '.join(placeholders)}"
     return self.executeQuery(query,identifiers)
 
   def openBlob(self,path):
