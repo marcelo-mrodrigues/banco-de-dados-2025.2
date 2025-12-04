@@ -89,7 +89,7 @@ create table Equipamento(
     id_tipo_equipamento int not null,
     foreign key (id_tipo_equipamento) references Tipo_equipamento(id_tipo_equipamento),
 
-    nome_equipamento varchar(15) not null, -- alteracao
+    nome_equipamento varchar(31) not null, -- alteracao
     status_conservacao enum('Funcional','Em manutenção','Manutenção agendada','Quebrado','Desconhecido') not null default  'Funcional' -- alteracao
 );
 
