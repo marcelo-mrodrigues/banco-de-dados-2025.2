@@ -4,6 +4,8 @@ Marcelo Marques Rodrigues - 221018960
 
 Daniel Toledo Dantas - 211068477
 
+Pedro Afonso Custódio de Lima - 232011350
+
 ## Especificações
 Linguagem de programação: Python
 
