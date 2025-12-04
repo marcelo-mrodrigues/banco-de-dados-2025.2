@@ -1,4 +1,5 @@
 DELIMITER //
+DROP PROCEDURE IF EXISTS sp_nova_reserva; //
 CREATE PROCEDURE sp_nova_reserva(
     IN p_id_usuario INT, 
     IN p_id_equipamento INT, 
@@ -13,9 +14,9 @@ BEGIN
     FROM Reserva
     WHERE id_equipamento = p_id_equipamento
     AND (
-        (p_inicio >= inicio AND p_inicio < fim) OR
-        (p_fim > inicio AND p_fim <= fim) OR
-        (p_inicio <= inicio AND p_fim >= fim)
+        p_inicio <= fim -- equipamento ainda reservado
+        AND
+        p_fim >= inicio -- alguem ja reservou um tempo futuro
     );
 
     IF conflito > 0 THEN

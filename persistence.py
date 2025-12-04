@@ -11,6 +11,12 @@ class Database:
     )
     self.cursor = self.db.cursor()
 
+  def getCursor(self):
+    return self.cursor
+  
+  def commitChanges(self):
+    self.db.commit()
+
   def executeQuery(self,query,params=None):
     if params:
       self.cursor.execute(query,params)
@@ -106,19 +112,6 @@ class Database:
     with open(path, "rb") as file:
       # rb = abre o arquivo em modo binario
       return file.read()
-    
-  def reservar_procedure(self, id_usuario, id_equipamento, inicio, fim):
-    try: #nova_rezerva
-      args = (id_usuario, id_equipamento, inicio, fim)
-        
-      self.cursor.callproc('sp_nova_reserva', args)
-      self.db.commit()
-      print("Sucesso na reserva")
-      return True
-      
-    except mysql.connector.Error as err:
-      print(f"Erro ao reservar: {err}")
-      return False
 
   def quitConnection(self):
     self.cursor.close()
@@ -130,6 +123,11 @@ class ParqueBD:
 
   def quitDB(self):
     self.db.quitConnection()
+
+  def reservar_procedure(self, id_usuario, id_equipamento, inicio, fim):
+    args = (id_usuario, id_equipamento, inicio, fim)
+    self.db.getCursor().callproc('sp_nova_reserva', args)
+    self.db.commitChanges()
 
   # -- CRUD Parque --
   def createPark(self,name,address=None,parkshift=None,mappath=None):
@@ -675,5 +673,60 @@ class ParqueBD:
 
   def deleteServiceOrder(self, orderID):
     return self.db.deleteTable("Ordem_servico", {"id_ordem_servico": orderID})
+  
+  # -- CRUD Reserva --
+  def createReservation(self, userID, equipID, start, end):
+    # Utilizando a procedure 'sp_nova_reserva'
+    return self.reservar_procedure(userID, equipID, start, end)
+
+  def readReservation(self, reservID=-1, userID=-1, equipID=-1, start=None, end=None):
+    filters = {}
+    if reservID > 0:
+      filters["id_reserva"] = reservID
+    if userID > 0:
+      filters["id_usuario"] = userID
+    if equipID > 0:
+      filters["id_equipamento"] = equipID
+    if start:
+      filters["inicio"] = start
+    if end:
+      filters["fim"] = end
+
+    # if not filters:
+    # nao implementado caso queira listar TODAS as reservas
+    
+    return self.db.readTable("Reserva", filtros=filters)
+
+  def updtReservation(self, reservID, newEquipID=-1, newStart=None, newEnd=None):  
+    invalid = 0
+    novos_valores = {}
+    if newEquipID > 0:
+      novos_valores["id_equipamento"] = newEquipID
+      invalid += 1
+    if newStart:
+      novos_valores["inicio"] = newStart
+      invalid += 1
+    if newEnd:
+      novos_valores["fim"] = newEnd
+      invalid += 1
+
+    if invalid < 1:
+      raise ValueError("Forneça ao menos um dado novo para atualizar a reserva")
+
+    return self.db.updateTable("Reserva", novos_valores, {"id_reserva": reservID})
+
+  def deleteReservation(self, reservID):
+    return self.db.deleteTable("Reserva", {"id_reserva": reservID})
 
 mybd = ParqueBD()
+# mybd.createPark("De diversão","Paraíso","Apenas as sextas 00:00 - 23:59")
+# mybd.createUser("João","00011100011","joao@teste.com","(11) 10000-0000")
+# mybd.createUser("José","11100011100","jose@teste.com","(00) 01111-1111")
+# mybd.createEquipType("Brinqudo",True)
+# mybd.createEquipment(1,1,"Carrosell")
+# # YYYY-MM-DD hh:mm:ss
+# mybd.createReservation(2,1,"2024-01-01 00:00:00","2024-12-31 23:59:59")
+# mybd.createReservation(1,1,"2025-01-01 00:00:00","2025-12-31 23:59:59")
+# mybd.createReservation(2,1,"2026-01-01 00:00:00","2026-12-31 23:59:59")
+
+# mybd.updtReservation(3,newEnd="2026-01-01 00:00:00") # erro esperado
