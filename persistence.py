@@ -184,8 +184,6 @@ class ParqueBD:
     return self.db.updateTable("Parque",novos_valores,{"id_parque":parkID})
   
   def deletePark(self,parkID):
-    if parkID < 1:
-      raise ValueError("ID de parque invalido na remoção")
     return self.db.deleteTable("Parque",{"id_parque":parkID})
   
   # -- CRUD Usuario --
@@ -342,9 +340,6 @@ class ParqueBD:
     return self.db.readTable("Cargo", filtros=filters)
 
   def updtCargo(self, cargoID, newname=None, newdescription=None):
-    if (cargoID < 1):
-      raise ValueError("ID de cargo inválido na atualização")
-
     invalid = 0 
     novos_valores = {}
     if newname:
@@ -360,8 +355,6 @@ class ParqueBD:
     return self.db.updateTable("Cargo", novos_valores, {"id_cargo": cargoID})
 
   def deleteCargo(self, cargoID):
-    if (cargoID < 1):
-      raise ValueError("ID de cargo inválido na remoção")
     return self.db.deleteTable("Cargo", {"id_cargo": cargoID})
   
   # -- CRUD Tipo Manutencao --
@@ -380,17 +373,10 @@ class ParqueBD:
 
     return self.db.readTable("Tipo_manutencao", filtros=filters)
 
-  def updtMaintType(self, typeID, newname):
-    if typeID < 1:
-      raise ValueError("ID inválido na atualização do tipo de manutenção")
-    if not newname:
-      raise ValueError("Forneça o novo nome do tipo de manutenção")
-    
+  def updtMaintType(self, typeID, newname):   
     return self.db.updateTable("Tipo_manutencao", {"nome_tipo": newname}, {"id_tipo_manutencao": typeID})
 
   def deleteMaintType(self, typeID):
-    if typeID < 1:
-      raise ValueError("ID inválido na remoção do tipo de manutenção")
     return self.db.deleteTable("Tipo_manutencao", {"id_tipo_manutencao": typeID})
 
   # -- CRUD Tipo Equipamento --
@@ -411,9 +397,6 @@ class ParqueBD:
     return self.db.readTable("Tipo_equipamento", filtros=filters)
 
   def updtEquipType(self, typeID, newname=None, newallowreservation=None):
-    if typeID < 1:
-      raise ValueError("ID inválido na atualização do tipo de equipamento")
-
     invalid = 0
     novos_valores = {}
     
@@ -431,8 +414,6 @@ class ParqueBD:
     return self.db.updateTable("Tipo_equipamento", novos_valores, {"id_tipo_equipamento": typeID})
 
   def deleteEquipType(self, typeID):
-    if typeID < 1:
-      raise ValueError("ID inválido na remoção do tipo de equipamento")
     return self.db.deleteTable("Tipo_equipamento", {"id_tipo_equipamento": typeID})
   
   # -- CRUD Evento --
@@ -475,12 +456,8 @@ class ParqueBD:
     return self.db.readTable("Evento", filtros=filters)
 
   def updtEvent(self, eventID, newparkID=-1, newname=None, newstart=None, newend=None, neworganizer=None):
-    if eventID < 1:
-      raise ValueError("ID de evento inválido na atualização")
-    
     invalid = 0
     novos_valores = {}
-    
     if newparkID > 0:
       novos_valores["id_parque"] = newparkID
       invalid += 1
@@ -503,8 +480,6 @@ class ParqueBD:
     return self.db.updateTable("Evento", novos_valores, {"id_evento": eventID})
 
   def deleteEvent(self, eventID):
-    if eventID < 1:
-      raise ValueError("ID de evento inválido na remoção")
     return self.db.deleteTable("Evento", {"id_evento": eventID})
   
   # -- CRUD Avaliacao --
@@ -539,13 +514,9 @@ class ParqueBD:
 
     return self.db.readTable("Avaliacao", filtros=filters)
 
-  def updtReview(self, avaliacaoID, newrating=None, newcomment=None):
-    if avaliacaoID < 1:
-      raise ValueError("ID de avaliação inválido na atualização")
-    
+  def updtReview(self, avaliacaoID, newrating=None, newcomment=None):   
     invalid = 0
     novos_valores = {}
-    
     if newrating:
       novos_valores["nota"] = newrating
       invalid += 1
@@ -559,8 +530,150 @@ class ParqueBD:
     return self.db.updateTable("Avaliacao", novos_valores, {"id_avaliacao": avaliacaoID})
 
   def deleteReview(self, avaliacaoID):
-    if avaliacaoID < 1:
-      raise ValueError("ID de avaliação inválido na remoção")
     return self.db.deleteTable("Avaliacao", {"id_avaliacao": avaliacaoID})
+  
+  # -- CRUD Alocacao --
+  def createAllocation(self, funcID, parkID, cargoID, startDate=None):
+    if (funcID < 1) or (parkID < 1) or (cargoID < 1):
+      raise ValueError("É necessário informar IDs de funcionário, parque e cargo.")
+
+    data = {"id_funcionario": funcID, "id_parque": parkID, "id_cargo": cargoID}
+    if startDate:
+      data["data_inicio"] = startDate
+    
+    return self.db.insertTable("Alocacao", data)
+
+  def readAllocation(self, funcID=-1, parkID=-1, cargoID=-1):
+    if (funcID < 1) and (parkID < 1) and (cargoID < 1):
+      raise ValueError("Informe ao menos um atributo da alocação")
+
+    filters = {}
+    if funcID > 0:
+      filters["id_funcionario"] = funcID
+    if parkID > 0:
+      filters["id_parque"] = parkID
+    if cargoID > 0:
+      filters["id_cargo"] = cargoID
+
+    return self.db.readTable("Alocacao", filtros=filters)
+
+  def updtAllocation(self, funcID, parkID, newCargoID=-1, newStartDate=-1):
+    invalid = 0
+    novos_valores = {}
+    if newCargoID > 0:
+      novos_valores["id_cargo"] = newCargoID
+      invalid += 1
+    if newStartDate:
+      novos_valores["data_inicio"] = newStartDate
+      invalid += 1
+      
+    if invalid < 1:
+      raise ValueError("Forneça um novo cargo ou nova data para atualizar")
+
+    return self.db.updateTable("Alocacao", novos_valores, {"id_funcionario": funcID,"id_parque": parkID})
+
+  def deleteAllocation(self, funcID, parkID):
+    return self.db.deleteTable("Alocacao", {"id_funcionario": funcID,"id_parque": parkID})
+  
+  # -- CRUD Equipamento --
+  def createEquipment(self, parkID, typeID, name, status='Funcional'):
+    # Status pode ser 'Funcional','Em manutenção','Manutenção agendada','Quebrado' ou 'Desconhecido'
+    data = {"id_parque": parkID, "id_tipo_equipamento": typeID,"nome_equipamento":name, "status_conservacao": status}
+
+    return self.db.insertTable("Equipamento", data)
+
+  def readEquipment(self, equipID=-1, parkID=-1, typeID=-1, name=None, status=None):
+    filters = {}
+    if equipID > 0:
+      filters["id_equipamento"] = equipID
+    if parkID > 0:
+      filters["id_parque"] = parkID
+    if typeID > 0:
+      filters["id_tipo_equipamento"] = typeID
+    if name:
+      filters["nome_equipamento"] = name
+    if status:
+      filters["status_conservacao"] = status
+
+    # if not filters:
+    # nao implementado caso queira listar TODOS os equipamentos
+
+    return self.db.readTable("Equipamento", filtros=filters)
+
+  def updtEquipment(self, equipID, newParkID=-1, newTypeID=-1, newName=None, newStatus=None):
+    invalid = 0
+    novos_valores = {}
+    if newParkID > 0:
+      novos_valores["id_parque"] = newParkID
+      invalid += 1
+    if newTypeID > 0:
+      novos_valores["id_tipo_equipamento"] = newTypeID
+      invalid += 1
+    if newName:
+      novos_valores["nome_equipamento"] = newName
+      invalid += 1
+    if newStatus:
+      novos_valores["status_conservacao"] = newStatus
+      invalid += 1
+    
+    if invalid < 1:
+      raise ValueError("Forneça ao menos um dado novo para atualizar o equipamento")
+
+    return self.db.updateTable("Equipamento", novos_valores, {"id_equipamento": equipID})
+
+  def deleteEquipment(self, equipID):
+    return self.db.deleteTable("Equipamento", {"id_equipamento": equipID})
+
+  # -- CRUD Ordem de Serviço --
+  def createServiceOrder(self, equipID, maintTypeID, funcID, openDate=None, description=None, status='Pendente'):
+    # Status pode ser 'Pendente','Concluída' ou 'Cancelada'
+    data = {"id_equipamento": equipID, "id_tipo_manutencao": maintTypeID, "id_funcionario_responsavel": funcID, "status_ordem": status}
+
+    if openDate:
+      data["data_abertura"] = openDate
+    if description:
+      data["descricao_problema"] = description
+
+    return self.db.insertTable("Ordem_servico", data)
+
+  def readServiceOrder(self, orderID=-1, equipID=-1, funcID=-1, status=None, openDate=None):
+    filters = {}
+    if orderID > 0:
+      filters["id_ordem_servico"] = orderID
+    if equipID > 0:
+      filters["id_equipamento"] = equipID
+    if funcID > 0:
+      filters["id_funcionario_responsavel"] = funcID
+    if status:
+      filters["status_ordem"] = status
+    if openDate:
+      filters["data_abertura"] = openDate
+
+    return self.db.readTable("Ordem_servico", filtros=filters)
+
+  def updtServiceOrder(self, orderID, newEquipID=-1,newMaintType=-1, newFuncID=-1, newDesc=None, newStatus=None):
+    invalid = 0
+    novos_valores = {}
+    if newEquipID > 0:
+      novos_valores["id_equipamento"] = newEquipID
+    if newMaintType > 0:
+      novos_valores["id_tipo_manutencao"] = newMaintType
+    if newFuncID > 0:
+      novos_valores["id_funcionario_responsavel"] = newFuncID
+      invalid += 1
+    if newDesc:
+      novos_valores["descricao_problema"] = newDesc
+      invalid += 1
+    if newStatus:
+      novos_valores["status_ordem"] = newStatus
+      invalid += 1
+
+    if invalid < 1:
+      raise ValueError("Forneça novos dados para atualizar a ordem de serviço")
+
+    return self.db.updateTable("Ordem_servico", novos_valores, {"id_ordem_servico": orderID})
+
+  def deleteServiceOrder(self, orderID):
+    return self.db.deleteTable("Ordem_servico", {"id_ordem_servico": orderID})
 
 mybd = ParqueBD()

@@ -10,8 +10,8 @@ Linguagem de programação: Python
 SGBD utilizado: MySQL
 
 ## Onde IA foi usada
-- Para criar uma foto de funcionário
-- Para criar uma base para os cruds de funcionario, cargo,tipo_manutencao e tipo_equipamento baseado nos cruds de usuário e parque que foram feitos sem o auxílio de ferramentas de IA.
+- Para gerar uma foto de funcionário
+- Para acelerar o desenvolvimento dos demais cruds usando como base os cruds de parque e usuario que foram feitos sem auxilio das ferramentas
 
 ## Tutoriais
 ### MySQL connector

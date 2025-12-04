@@ -59,14 +59,15 @@ create table Cargo(
 
 create table Alocacao(
     id_funcionario int not null,
-    primary key (id_funcionario, id_parque), -- um funcionario 1 cargo alteração
     foreign key (id_funcionario) references Funcionario(id_funcionario),
     id_parque int not null,
+    primary key (id_funcionario, id_parque), -- um funcionario 1 cargo alteração
+    
     foreign key (id_parque) references Parque(id_parque),
     id_cargo int not null,
     foreign key (id_cargo) references Cargo(id_cargo),
 
-    data_inicio date
+    data_inicio date default (CURRENT_DATE)
 );
 
 create table Tipo_manutencao(
@@ -88,8 +89,8 @@ create table Equipamento(
     id_tipo_equipamento int not null,
     foreign key (id_tipo_equipamento) references Tipo_equipamento(id_tipo_equipamento),
 
-    nome_equipamento varchar(15),
-    status_conservacao enum('Funcional','Em manutenção','Manutenção agendada','Quebrado','Desconhecido')
+    nome_equipamento varchar(15) not null, -- alteracao
+    status_conservacao enum('Funcional','Em manutenção','Manutenção agendada','Quebrado','Desconhecido') not null default  'Funcional' -- alteracao
 );
 
 create table Ordem_servico(
@@ -102,9 +103,9 @@ create table Ordem_servico(
     id_funcionario_responsavel int not null,
     foreign key (id_funcionario_responsavel) references Funcionario(id_funcionario),
 
-    data_abertura date,
+    data_abertura date default (CURRENT_DATE), -- alteracao
     descricao_problema text,
-    status_ordem enum('Pendente','Concluída','Cancelada') Default 'Pendente' -- alteração
+    status_ordem enum('Pendente','Concluída','Cancelada') not null default 'Pendente' -- alteração
 );
 
 create table Reserva(
